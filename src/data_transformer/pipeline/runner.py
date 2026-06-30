@@ -68,6 +68,7 @@ class PipelineResult:
     profiles: List[Dict[str, Any]]
     report: Dict[str, Any]
     invalid_profiles: List[Dict[str, Any]]
+    summary: Dict[str, Any] = field(default_factory=dict)
 
 
 # ─── Pipeline Runner ──────────────────────────────────────────────────────────
@@ -202,12 +203,12 @@ class PipelineRunner:
 
     # ─── Main Run ─────────────────────────────────────────────────────────────
 
-    def run(self, sources: List[Source]) -> PipelineResult:
+    def run(self, sources: List[Source], on_progress=None) -> PipelineResult:
         """Synchronous runner for tests and legacy execution."""
-        clusters, source_results, norm_log, run_id, start_time = self.run_phase_1(sources)
-        return self.run_phase_2(clusters, source_results, norm_log, run_id, start_time)
+        clusters, source_results, norm_log, run_id, start_time = self.run_phase_1(sources, on_progress=on_progress)
+        return self.run_phase_2(clusters, source_results, norm_log, run_id, start_time, on_progress=on_progress)
 
-    def run_phase_1(self, sources: List[Source]) -> tuple[List[Any], List[SourceResult], List[Dict], str, float]:
+    def run_phase_1(self, sources: List[Source], on_progress=None) -> tuple[List[Any], List[SourceResult], List[Dict], str, float]:
         start_time = time.time()
         run_id = f"run_{uuid.uuid4().hex[:8]}"
         self.log.info("pipeline_started", run_id=run_id, sources=len(sources))
@@ -216,10 +217,28 @@ class PipelineRunner:
         raw_records: List[RawRecord] = []
         source_results: List[SourceResult] = []
 
-        for source in sources:
-            sr = self._detect_and_extract(source)
-            source_results.append(sr)
-            raw_records.extend(sr._records)
+        import concurrent.futures
+        
+        if on_progress:
+            on_progress("Extraction", 0, len(sources))
+            
+        max_workers = min(8, len(sources)) if sources else 1
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_source = {executor.submit(self._detect_and_extract, s): s for s in sources}
+            
+            completed = 0
+            for future in concurrent.futures.as_completed(future_to_source):
+                try:
+                    sr = future.result()
+                    source_results.append(sr)
+                    raw_records.extend(sr._records)
+                except Exception as exc:
+                    s = future_to_source[future]
+                    self.log.error("extraction_future_failed", source=s.path, error=str(exc))
+                    
+                completed += 1
+                if on_progress:
+                    on_progress("Extraction", completed, len(sources))
 
         # ── Stage 2: Normalization ────────────────────────────────────────────
         normalization_log: List[Dict[str, Any]] = []
@@ -238,7 +257,7 @@ class PipelineRunner:
         
         return clusters, source_results, normalization_log, run_id, start_time
 
-    def run_phase_2(self, clusters: List[Any], source_results: List[SourceResult], normalization_log: List[Dict], run_id: str, start_time: float, projection_config: Optional[Dict[str, Any]] = None) -> PipelineResult:
+    def run_phase_2(self, clusters: List[Any], source_results: List[SourceResult], normalization_log: List[Dict], run_id: str, start_time: float, projection_config: Optional[Dict[str, Any]] = None, on_progress=None) -> PipelineResult:
         if projection_config is not None:
             self.projector = Projector(projection_config)
         # ── Stage 4 & 5: Merge + Confidence Scoring ───────────────────────────
@@ -249,6 +268,10 @@ class PipelineRunner:
         post_process_log: List[Dict] = []
         min_conf = self.config.get("output", {}).get("min_overall_confidence", 0.0)
 
+        if on_progress:
+            on_progress("Merging", 0, len(clusters))
+
+        completed_clusters = 0
         for cluster in clusters:
             # Map CandidateCluster back to MatchGroup for merge engine compatibility
             group = MatchGroup()
@@ -286,6 +309,10 @@ class PipelineRunner:
                     cid=merged.candidate_id,
                     conf=merged.overall_confidence,
                 )
+
+            completed_clusters += 1
+            if on_progress:
+                on_progress("Merging", completed_clusters, len(clusters))
 
         # ── Stage 6 & 7: Projection + Validation ─────────────────────────────
         final_profiles: List[Dict] = []
@@ -335,6 +362,23 @@ class PipelineRunner:
             post_process_log=post_process_log,
         )
 
+        # Batch Processing Summary
+        files_processed = len(source_results)
+        candidates_detected = len(clusters)
+        profiles_generated = len(final_profiles)
+        duplicates_merged = files_processed - candidates_detected if files_processed > candidates_detected else 0
+        failed_files = sum(1 for sr in source_results if sr.failed)
+        
+        summary = {
+            "files_processed": files_processed,
+            "candidates_detected": candidates_detected,
+            "profiles_generated": profiles_generated,
+            "duplicates_merged": duplicates_merged,
+            "failed_files": failed_files,
+            "processing_time": f"{round(duration, 2)}s",
+            "warnings": validation_warnings
+        }
+
         self.log.info(
             "pipeline_completed",
             run_id=run_id,
@@ -347,6 +391,7 @@ class PipelineRunner:
             profiles=final_profiles,
             report=report,
             invalid_profiles=invalid_profiles,
+            summary=summary,
         )
 
 
