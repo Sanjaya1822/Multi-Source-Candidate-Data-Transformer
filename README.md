@@ -39,12 +39,17 @@ git clone https://github.com/Sanjaya1822/Multi-Source-Candidate-Data-Transformer
 cd Multi-Source-Candidate-Data-Transformer
 ```
 
-__Install the required dependencies__:
+**Install the required dependencies**:
 
+```bash
 pip install -r requirements.txt
-__Launch the application__:
+```
 
+**Launch the application**:
+
+```bash
 streamlit run app.py
+```
 
 The application will be available at http://localhost:8501.
 
