@@ -216,6 +216,8 @@ elif st.session_state.pipeline_phase == "results":
     }
     json_str = json.dumps(combined_json, indent=2)
     
+    import re
+    
     # Create ZIP archive
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
@@ -223,7 +225,10 @@ elif st.session_state.pipeline_phase == "results":
         zip_file.writestr("quality_report.json", json.dumps(res.report, indent=2))
         for p in res.profiles:
             cid = p.get("candidate_id", uuid.uuid4().hex[:8])
-            zip_file.writestr(f"candidates/candidate_{cid}.json", json.dumps(p, indent=2))
+            raw_name = p.get("full_name") or p.get("candidate_name") or "Unknown"
+            clean_name = re.sub(r'[^a-zA-Z0-9]', '_', str(raw_name)).strip('_')
+            filename = f"candidates/{clean_name}_{cid}.json"
+            zip_file.writestr(filename, json.dumps(p, indent=2))
             
     col_dl1, col_dl2 = st.columns(2)
     with col_dl1:
