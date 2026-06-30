@@ -24,70 +24,22 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    :root {
-        --primary-brown: #5d4037;
-        --secondary-brown: #8d6e63;
-        --bg-color: #fbf7f4;
-        --text-main: #3e2723;
-        --card-bg: #ffffff;
-        --border-light: #efebe9;
-        --success: #4caf50;
-    }
-    
-    .stApp {
-        background-color: var(--bg-color);
-        color: var(--text-main);
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    }
-    
     .header-container {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1.25rem 2.5rem;
-        background-color: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
+        padding: 1rem 2rem;
+        background-color: transparent;
         border-bottom: 1px solid rgba(93, 64, 55, 0.1);
-        box-shadow: 0 4px 20px rgba(93, 64, 55, 0.03);
-        margin-bottom: 2.5rem;
+        margin-bottom: 2rem;
     }
     
     .header-title {
-        color: var(--primary-brown);
+        color: #5d4037;
         font-weight: 700;
         font-size: 1.75rem;
         margin: 0;
-    }
-    
-    .saas-card {
-        background: var(--card-bg);
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(93, 64, 55, 0.03);
-        border: 1px solid rgba(239, 235, 233, 0.8);
-        margin-bottom: 1.5rem;
-    }
-    
-    .card-title {
-        color: var(--primary-brown);
-        font-size: 1.2rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        border-bottom: 2px solid var(--border-light);
-        padding-bottom: 0.75rem;
-    }
-
-    div.stButton > button {
-        background-color: var(--primary-brown);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 1.5rem;
-        width: 100%;
-    }
-    
-    div.stButton > button:hover {
-        background-color: var(--secondary-brown);
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
 </style>
 """, unsafe_allow_html=True)
