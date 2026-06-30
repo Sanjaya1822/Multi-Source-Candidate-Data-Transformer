@@ -32,15 +32,16 @@ __Installation (Run Locally)__
 
 Ensure you have Python 3.11+ installed.
 
-__Clone the repository__:
+**Clone the repository**:
 
+```bash
 git clone https://github.com/Sanjaya1822/Multi-Source-Candidate-Data-Transformer.git
 cd Multi-Source-Candidate-Data-Transformer
+```
 
 __Install the required dependencies__:
 
 pip install -r requirements.txt
-
 __Launch the application__:
 
 streamlit run app.py
