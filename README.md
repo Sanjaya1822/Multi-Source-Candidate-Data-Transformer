@@ -26,7 +26,7 @@ __Interactive Streamlit Interface__: Provides an intuitive web-based interface f
 
 Try the deployed application:
 
-__Live Application__: https: https://multi-source-candidate-data-transformer.streamlit.app/
+__Live Application__: https://multi-source-candidate-data-transformer.streamlit.app/
 
 __Installation (Run Locally)__
 
