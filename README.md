@@ -103,3 +103,6 @@ pytest tests/ -v
 
 The tests validate the core pipeline, including data extraction, normalization, candidate clustering, conflict resolution, projection, and batch processing.
 
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
