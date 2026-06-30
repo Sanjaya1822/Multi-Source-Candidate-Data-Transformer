@@ -89,10 +89,12 @@ The application automatically generates the corresponding Configuration JSON and
 }
 ```
 __Missing Value Policies__
- -omit – Exclude missing fields.
- -null – Include missing fields with null.
- -error – Stop execution and report a validation error.
 
+| Policy | Description |
+|---------|-------------|
+| `omit` | Exclude missing fields |
+| `null` | Include missing fields with `null` |
+| `error` | Stop execution and report a validation error |
 # Testing
 
 Run the automated test suite using pytest:
