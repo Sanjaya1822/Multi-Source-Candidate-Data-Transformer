@@ -1,0 +1,25 @@
+{
+  "id": "res_001",
+  "full_name": "Jane Smith",
+  "emails": ["jane.smith@example.com"],
+  "phones": ["+14155551234"],
+  "location": "San Francisco, CA",
+  "links": [{"url": "https://github.com/janesmith", "type": "github"}],
+  "skills": ["Python", "TensorFlow", "PyTorch"],
+  "experience": [
+    {
+      "company": "TechCorp Inc.",
+      "title": "Software Engineer",
+      "start_date": "2021-06"
+    }
+  ],
+  "education": [
+    {
+      "institution": "Stanford University",
+      "degree": "B.S. Computer Science",
+      "start_date": "2017-09",
+      "end_date": "2021-06"
+    }
+  ],
+  "updated_at": "2025-10-01T00:00:00Z"
+}

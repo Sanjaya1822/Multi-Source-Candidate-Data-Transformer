@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataTransformer | Advanced Resume Merger</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="app-container">
+        <header class="glass-header slide-down">
+            <div class="logo-area">
+                <div class="logo-icon">DT</div>
+                <div>
+                    <h1 class="logo">DataTransformer</h1>
+                    <div class="tagline">Next-Gen Profile Synthesis Engine</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content fade-in">
+            <div class="left-panel glass-panel hover-glow">
+                <div class="panel-header">
+                    <h2><span class="icon">⚙️</span> Pipeline Settings</h2>
+                </div>
+                <div class="config-section">
+                    <label>Configuration JSON</label>
+                    <textarea id="config-json" rows="8">{
+    "deduplication": {
+        "threshold": 0.85
+    },
+    "conflict_resolution": {
+        "strategy": "highest_confidence"
+    }
+}</textarea>
+                </div>
+                <div class="config-section">
+                    <label>Output Schema JSON</label>
+                    <textarea id="schema-json" rows="12">{
+    "fields": [
+        {"path": "candidate_id", "type": "string"},
+        {"path": "full_name", "type": "string", "required": true},
+        {"path": "primary_email", "from": "emails[0]", "type": "string", "required": true},
+        {"path": "phone", "from": "phones[0]", "type": "string", "normalize": "E164"},
+        {"path": "skills", "from": "skills", "type": "string[]", "normalize": "canonical"},
+        {"path": "experience", "type": "array"}
+    ],
+    "include_confidence": true,
+    "on_missing": "null"
+}</textarea>
+                </div>
+            </div>
+
+            <div class="center-panel glass-panel hover-glow">
+                <div class="panel-header">
+                    <h2><span class="icon">📁</span> Data Ingestion</h2>
+                    <p class="subtitle">Supports: ATS, LinkedIn, Resume, CSV, GitHub Profiles</p>
+                </div>
+                <!-- INGEST TAB -->
+            <div id="ingest-tab" class="tab-content active">
+                
+                <div class="requirements-box" style="justify-content: center; font-weight: 500;">
+                    <div class="req-item">
+                        <span class="indicator source-ind" style="background-color: #EF4444;"></span>
+                        At least one data source or URL is required
+                    </div>
+                </div>
+
+                <div class="source-section">
+                    <div class="section-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        STRUCTURED SOURCES
+                    </div>
+                    <div class="upload-zone" id="drop-zone-structured">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <p>Drop CSV or ATS JSON files here</p>
+                        <input type="file" id="file-input-structured" multiple accept=".csv,.json" class="hidden">
+                    </div>
+                    <div id="file-list-structured" class="file-list"></div>
+                </div>
+
+                <div class="source-section">
+                    <div class="section-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13.22 19.03a1.4 1.4 0 0 0 2.05.04l4.69-4.69a1.4 1.4 0 0 0 0-1.98l-4.69-4.69a1.4 1.4 0 1 0-1.98 1.98l2.3 2.3H3v2.8h12.59l-2.3 2.3a1.4 1.4 0 0 0-.07 1.94z"></path></svg>
+                        UNSTRUCTURED SOURCES
+                    </div>
+                    
+                    <div class="upload-zone" id="drop-zone-unstructured">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <p>Drop Resume (PDF/TXT) or Notes here</p>
+                        <input type="file" id="file-input-unstructured" multiple class="hidden">
+                    </div>
+                    <div id="file-list-unstructured" class="file-list"></div>
+                    
+                    <div class="url-inputs">
+                        <div class="input-group">
+                            <span class="icon">GH</span>
+                            <input type="text" id="github-url" placeholder="https://github.com/username">
+                        </div>
+                        <div class="input-group">
+                            <span class="icon">IN</span>
+                            <input type="text" id="linkedin-url" placeholder="https://linkedin.com/in/username">
+                        </div>
+                    </div>
+                </div>
+
+                <button id="merge-btn" disabled>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Run Pipeline
+                </button>
+            </div>
+            </div>
+
+            <div class="right-panel glass-panel hover-glow">
+                <div class="panel-header">
+                    <h2><span class="icon">✨</span> Unified Output</h2>
+                </div>
+                <div class="results-container">
+                    <div class="loader hidden" id="loader">
+                        <div class="spinner-core">
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                        </div>
+                        <p>Fusing data sources...</p>
+                    </div>
+                    <div id="results-content" class="results-content hidden">
+                        <div class="tabs">
+                            <button class="tab-btn active" data-target="profiles">Merged JSON</button>
+                            <button class="tab-btn" data-target="report">Quality Report</button>
+                        </div>
+                        <div class="tab-content active" id="profiles-tab">
+                            <pre><code id="profiles-json" class="json-code"></code></pre>
+                        </div>
+                        <div class="tab-content" id="report-tab">
+                            <pre><code id="report-json" class="json-code"></code></pre>
+                        </div>
+                    </div>
+                    <div class="empty-state" id="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <p>Upload files and run the pipeline to see the unified candidate profiles here.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

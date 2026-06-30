@@ -1,0 +1,19 @@
+{
+  "profile_id": "janesmith123",
+  "full_name": "Jane A. Smith",
+  "email": "jane@smith.net",
+  "phone": "+14155551234",
+  "location": "San Francisco Bay Area",
+  "linkedin_url": "https://linkedin.com/in/janesmith123",
+  "skills": ["Python", "Deep Learning", "GCP"],
+  "positions": [
+    {
+      "title": "Senior Software Engineer",
+      "company_name": "TechCorp",
+      "start_date": {"year": 2021, "month": 6},
+      "end_date": null,
+      "is_current": true
+    }
+  ],
+  "updated_at": "2026-06-28T14:30:00Z"
+}

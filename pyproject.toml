@@ -1,0 +1,67 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "data-transformer"
+version = "2.0.0"
+description = "Eightfold-style candidate merging pipeline with LLM-powered conflict resolution"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "DataTransformer", email = "team@datatransformer.io" }]
+
+dependencies = [
+    # Core
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    # API
+    "fastapi>=0.111",
+    "uvicorn[standard]>=0.30",
+    "python-multipart>=0.0.9",
+    # CLI
+    "typer>=0.12",
+    "rich>=13.7",
+    # Parsing
+    "pdfplumber>=0.11",
+    "python-docx>=1.1",
+    # Normalization
+    "phonenumbers>=8.13",
+    "python-dateutil>=2.9",
+    # Matching
+    "rapidfuzz>=3.9",
+    # Validation
+    "jsonschema>=4.22",
+    # Logging
+    "structlog>=24.2",
+    # Config
+    "pyyaml>=6.0",
+    # HTTP
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+llm = [
+    "transformers>=4.41",
+    "torch>=2.3",
+    "accelerate>=0.30",
+]
+vectors = [
+    "sentence-transformers>=3.0",
+]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "hypothesis>=6.103",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+dt = "data_transformer.cli.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/data_transformer"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

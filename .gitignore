@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python cache
+.pytest_cache/
+.mypy_cache/
+
+# Build
+build/
+dist/
+
+# Logs
+*.log
+
+# Environment Variables
+.env
+
+# Coverage
+.coverage
+htmlcov/
+
+# Generated outputs
+merged_output.json
+quality_report.json
+
+# Temporary files
+*.tmp

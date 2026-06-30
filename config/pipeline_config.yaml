@@ -1,0 +1,68 @@
+# Pipeline Configuration
+# ─────────────────────────────────────────────────────────
+
+pipeline:
+  name: "eightfold-candidate-merger"
+  version: "2.0"
+
+# Source trust scores (overridable per adapter)
+sources:
+  github:
+    trust_score: 0.98
+    priority: 1
+  ats:
+    trust_score: 0.95
+    priority: 2
+  linkedin:
+    trust_score: 0.90
+    priority: 3
+  resume:
+    trust_score: 0.80
+    priority: 4
+  csv:
+    trust_score: 0.70
+    priority: 5
+  notes:
+    trust_score: 0.50
+    priority: 6
+
+# Deduplication settings
+dedup:
+  fuzzy_threshold: 0.85          # rapidfuzz ratio threshold for name match
+  name_company_threshold: 0.80   # combined name+company threshold
+  enable_vectors: false          # requires sentence-transformers extra
+  vector_threshold: 0.90
+
+# Conflict resolution
+conflict_resolver: "highest_confidence"          # priority_order | majority_vote | latest_wins | highest_confidence | llm
+llm_fallback_resolver: "priority_order"  # used when LLM fails or confidence < threshold
+llm_confidence_threshold: 0.60   # reject LLM result below this
+
+# LLM settings
+llm:
+  backend: "mock"                # mock | phi3
+  model_name: "microsoft/Phi-3-mini-4k-instruct"
+  max_tokens: 256
+  temperature: 0.1
+
+# Field-specific resolver overrides (simple fields always use deterministic)
+field_resolver_overrides:
+  emails: "priority_order"       # email always deterministic
+  phones: "priority_order"       # phone always deterministic
+  full_name: "majority_vote"
+  experience: "priority_order"
+  skills: "majority_vote"        # skills — use cross-source agreement
+  location: "latest_wins"
+
+# Output
+output:
+  include_confidence: true
+  include_provenance: true
+  include_merge_reason: true
+  missing_value_policy: "null"   # null | omit | error
+  min_overall_confidence: 0.0    # filter profiles below this
+
+# Logging
+logging:
+  level: "INFO"
+  format: "json"                 # json | console

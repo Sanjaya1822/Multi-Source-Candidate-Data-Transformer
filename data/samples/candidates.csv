@@ -1,0 +1,3 @@
+id,name,email,phone,location,skills
+csv_001,Jane Smith,jane.smith@example.com,,San Francisco,"Python, React, TypeScript"
+csv_002,Bob Jones,bob@jones.com,+15551234567,New York,"Go, Kubernetes"

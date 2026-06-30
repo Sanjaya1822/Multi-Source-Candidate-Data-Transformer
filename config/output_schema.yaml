@@ -1,0 +1,50 @@
+# Output Projection Schema
+# Controls what fields appear in the final output and how they are named.
+# ─────────────────────────────────────────────────────────
+
+output_schema: "eightfold_v1"
+
+# Field selection — which fields to include in the output
+field_selection:
+  include:
+    - candidate_id
+    - full_name
+    - emails
+    - phones
+    - location
+    - links
+    - skills
+    - experience
+    - education
+    - overall_confidence
+    - merge_summary
+    - provenance
+  exclude: []
+
+# Rename internal paths to output paths
+# Format: "output_field_name": "internal.jsonpath.expression"
+remapping:
+  "name": "full_name.value"
+  "primary_email": "emails[0].value"
+  "primary_phone": "phones[0].value"
+  "location_display": "location.formatted"
+
+# Array transformations
+transformations:
+  skills:
+    type: array
+    transform: take_top_n
+    n: 15
+    sort_by: confidence
+  experience:
+    type: array
+    transform: sort_by_recency
+  education:
+    type: array
+    transform: sort_by_recency
+
+missing_value_policy: "null"   # null | omit | error
+
+include_confidence: true
+include_provenance: true
+include_merge_reason: true
