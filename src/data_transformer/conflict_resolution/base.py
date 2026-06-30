@@ -32,6 +32,7 @@ class ResolvedValue:
     confidence: float
     provenance: List[ProvenanceEntry]
     reasoning: Optional[str] = None
+    source: Optional[str] = None
 
 class ConflictResolver(ABC):
     """Base class for all conflict resolution strategies."""

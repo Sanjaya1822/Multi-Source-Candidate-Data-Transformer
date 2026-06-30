@@ -1,0 +1,51 @@
+Arjun Mehta
+arjun.mehta@gmail.com | +91-9876543210 | Bangalore, Karnataka, India
+LinkedIn: https://www.linkedin.com/in/arjunmehta | GitHub: https://github.com/arjunmehta
+
+CAREER OBJECTIVE
+Passionate software engineer seeking a challenging role in backend development and cloud infrastructure.
+
+TECHNICAL SKILLS
+Programming Languages: Python, Java, JavaScript, C++
+Frameworks & Libraries: Django, FastAPI, React, Spring Boot
+Cloud & DevOps: AWS, GCP, Docker, Kubernetes, Terraform
+Databases: PostgreSQL, MongoDB, Redis
+Tools: Git, Jira, VS Code
+
+EXPERIENCE
+
+Software Engineer Intern | Infosys
+June 2022 – August 2022
+• Developed REST APIs using Django and integrated with PostgreSQL
+• Wrote unit tests achieving 85% code coverage
+• Collaborated with team to migrate legacy code to microservices
+
+Junior Software Engineer | TCS (Tata Consultancy Services)
+September 2022 – March 2024
+• Built data pipelines processing 1M records/day using Apache Kafka
+• Optimised SQL queries reducing response time by 40%
+• Deployed services on AWS using Docker and Kubernetes
+
+Software Engineer | Flipkart
+April 2024 – Present
+• Leading development of recommendation engine serving 50M+ users
+• Architected event-driven microservices using Kafka and Redis
+Technologies: Python, Kafka, Redis, PostgreSQL, AWS
+
+PROJECTS
+
+Real-Time Stock Predictor
+Predicted stock prices using LSTM neural network.
+Technologies: Python, TensorFlow, Pandas, NumPy
+GitHub: https://github.com/arjunmehta/stock-predictor
+
+EDUCATION
+
+Visvesvaraya Technological University (VTU)
+B.E. Computer Science and Engineering
+2018 – 2022
+CGPA: 8.7 / 10
+
+CERTIFICATIONS
+AWS Certified Solutions Architect – Associate (2023)
+Google Cloud Professional Data Engineer (2024)

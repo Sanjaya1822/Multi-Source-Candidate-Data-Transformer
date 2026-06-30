@@ -1,0 +1,50 @@
+Jane Smith
+jane.smith@example.com | (415) 555-1234 | San Francisco, CA
+LinkedIn: https://www.linkedin.com/in/janesmith123/ | GitHub: https://github.com/janesmith
+
+SUMMARY
+Senior Software Engineer with 5+ years building distributed systems and ML pipelines.
+Expert in Python, cloud infrastructure, and machine learning frameworks.
+
+TECHNICAL SKILLS
+Programming Languages: Python, JavaScript, TypeScript, Go
+Frameworks & Libraries: FastAPI, React, TensorFlow, PyTorch, Django
+Cloud & DevOps: AWS, GCP, Docker, Kubernetes, Terraform, CI/CD
+Databases: PostgreSQL, MongoDB, Redis, DynamoDB
+Tools: Git, Jira, Figma
+
+EXPERIENCE
+
+Senior Software Engineer | TechCorp Inc.
+June 2021 – Present
+• Led development of real-time ML inference platform serving 10M+ requests/day
+• Reduced model latency by 40% using TensorRT and batching optimization
+• Mentored 3 junior engineers and drove adoption of clean architecture patterns
+Technologies: Python, FastAPI, TensorFlow, Kubernetes, AWS
+
+Software Engineer | StartupXYZ
+January 2019 – May 2021
+• Built core recommendation engine using collaborative filtering
+• Deployed microservices on GCP using Docker and Kubernetes
+• Integrated Stripe payments API and reduced checkout abandonment by 25%
+Technologies: Python, Flask, GCP, Docker, PostgreSQL
+
+PROJECTS
+
+Real-Time Fraud Detection System
+Built an end-to-end fraud detection pipeline using streaming data.
+Technologies: Python, Kafka, Spark, Redis, ML
+GitHub: https://github.com/janesmith/fraud-detector
+
+Open Source Contributions
+Contributor to scikit-learn and FastAPI. 3 merged PRs in 2024.
+
+EDUCATION
+
+Stanford University
+B.S. Computer Science, Machine Learning Specialization
+September 2015 – June 2019
+
+CERTIFICATIONS
+AWS Certified Solutions Architect – Associate (2022)
+Google Cloud Professional Data Engineer (2023)

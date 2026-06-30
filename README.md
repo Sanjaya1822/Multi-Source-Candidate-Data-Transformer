@@ -1,120 +1,80 @@
-# DataTransformer — Eightfold-Style Candidate Merging Pipeline
+# Multi-Source Candidate Data Transformer
 
-> **Version 2.0** | Production-grade candidate deduplication & merging with LLM-powered conflict resolution.
+A robust, enterprise-grade data pipeline for merging candidate profiles across multiple disparate sources. This project is the submission for the **Eightfold Engineering Intern Assignment**.
 
----
+## Key Features
 
-## 🏗 Architecture
+- **Multi-Source Support:** Ingests data from 6 independent sources:
+  1. ATS Exports (Structured JSON)
+  2. Recruiter CSVs (Structured)
+  3. LinkedIn Profiles (Structured JSON)
+  4. Resumes (Unstructured PDF/DOCX/TXT)
+  5. GitHub URLs (API Fetching)
+  6. Recruiter Notes (Unstructured TXT)
+- **Deterministic Deduplication:** Merges identical candidates across sources using RapidFuzz name-matching and contact overlap heuristics.
+- **Conflict Resolution Engine:** Configurable field-level resolvers (`majority_vote`, `latest_wins`, `priority_order`, `highest_confidence`, and `llm`).
+- **Rich Provenance Tracking:** Every merged field tracks its origin source, extraction method, pre-normalized raw value, confidence score, and selection reasoning.
+- **Quality Reporting:** Generates a comprehensive pipeline execution report including validation warnings, confidence distributions, and extraction statistics.
+- **Dynamic Schema Projection:** Internal data uses a strict canonical schema, which is dynamically projected into any requested output format via JSON Path configuration.
 
+## Architecture Overview
+
+The pipeline strictly adheres to the requested architecture:
+
+```text
+Input Sources → Source Detection → Extractors (Adapters)
+  ↓
+Raw Records → Normalization (Emails, Phones, Skills)
+  ↓
+Deduplication Matcher
+  ↓
+Merge Engine (Conflict Resolution)
+  ↓
+Canonical Candidate Records (with Provenance)
+  ↓
+Projection Layer & Validation
+  ↓
+Final JSON Output + Quality Report
 ```
-INPUT SOURCES → ADAPTERS → NORMALIZERS → DEDUP/MATCH → CONFLICT RESOLUTION → PROJECTION → VALIDATION → OUTPUT
-```
 
-- **5 Source Adapters**: ATS, LinkedIn, Resume (PDF/DOCX), CSV, Notes
-- **6 Field Normalizers**: Phone (E.164), Date (YYYY-MM), Skills taxonomy, Name, Company, Email
-- **3-Tier Deduplication**: Exact (email/phone) → Fuzzy (name+company) → Vector similarity
-- **5 Conflict Resolvers**: Priority Order, Majority Vote, Latest Wins, Highest Confidence, **🤖 LLM-Powered**
-- **Config-Driven Projection**: Field selection, remapping, transformations
-- **JSON Schema Validation** + Run-level Quality Report
+## Running the Project
 
----
+### Prerequisites
+- Python 3.9+
+- Poetry (or standard pip)
 
-## 🚀 Quick Start
-
-### Install
-
+### Installation
 ```bash
-pip install -e ".[dev]"
+pip install -r requirements.txt
 ```
 
-### Run Demo
-
+### Start the Server
 ```bash
-dt demo
+python -m uvicorn data_transformer.api.app:app --reload
 ```
+Navigate to `http://localhost:8000/ui/index.html` to access the Pipeline UI.
 
-### Merge Sources
+## Usage Guide (UI)
 
-```bash
-dt merge --input data/samples/ --config config/pipeline_config.yaml --output merged_output.json
-```
+The UI is divided into 3 columns:
 
-### Validate Output
+1. **Configuration**: Edit the JSON configuration for deduplication, conflict resolution, and the output schema.
+2. **Data Sources**: Upload files or paste URLs for the 6 supported sources. Any combination of sources is supported.
+3. **Results**: View the merged JSON profiles and the comprehensive Quality Report. Use the Copy or Download buttons to export the data.
 
-```bash
-dt validate --input merged_output.json
-```
+### Sample Files
+The project includes sample fixtures in `tests/fixtures/` and sample unstructured files in `samples/` that you can upload to test the pipeline.
 
-### Quality Report
+## Trust Scores & Extraction Methods
 
-```bash
-dt report --input merged_output.json
-```
+| Source | Input Type | Extraction Method | Trust Score |
+|---|---|---|---|
+| ATS | `.json` | Structured Parser | 0.95 |
+| Recruiter CSV | `.csv` | Structured Parser | 0.90 |
+| LinkedIn Data | `.json` | Structured Parser | 0.88 |
+| GitHub | URL | API Fetch (Repos & Bio) | 0.80 |
+| Resume | PDF/DOCX/TXT | Regex Extraction | 0.75 |
+| Recruiter Notes| `.txt` | Regex Extraction | 0.60 |
+| LinkedIn URL | URL | Stub (Link Only) | 0.30 |
 
-### Start API Server
-
-```bash
-uvicorn data_transformer.api.app:app --reload
-# POST http://localhost:8000/v1/merge
-```
-
----
-
-## ⚙️ Configuration
-
-Edit `config/pipeline_config.yaml` to control:
-
-| Setting | Description |
-|---------|-------------|
-| `conflict_resolver` | `priority_order` \| `majority_vote` \| `latest_wins` \| `highest_confidence` \| `llm` |
-| `llm.backend` | `mock` (default) \| `phi3` (requires `pip install -e ".[llm]"`) |
-| `dedup.fuzzy_threshold` | Name similarity threshold (default: 0.85) |
-| `dedup.enable_vectors` | Vector similarity matching (requires `.[vectors]`) |
-
----
-
-## 🤖 LLM Conflict Resolution
-
-By default, the **mock LLM resolver** is used — it returns deterministic structured reasoning without any model download.
-
-To use the real **Phi-3-Mini-4K** model:
-
-```bash
-pip install -e ".[llm]"
-# In config/pipeline_config.yaml:
-# conflict_resolver: llm
-# llm:
-#   backend: phi3
-```
-
----
-
-## 🧪 Tests
-
-```bash
-pytest tests/ -v --tb=short
-```
-
----
-
-## 📁 Project Structure
-
-```
-DataTransformer/
-├── config/                  # Pipeline and output schema configs
-├── data/samples/            # Sample input data (5 candidates, 4 sources)
-├── src/data_transformer/
-│   ├── schema/              # Pydantic canonical schema
-│   ├── adapters/            # Source adapters (ATS, LinkedIn, Resume, CSV, Notes)
-│   ├── normalizers/         # Field normalizers
-│   ├── deduplication/       # Fuzzy + exact matching
-│   ├── conflict_resolution/ # 5 pluggable strategies + LLM
-│   ├── merger/              # Merge orchestration
-│   ├── projection/          # Config-driven output transformation
-│   ├── validation/          # JSON Schema validation
-│   ├── reporting/           # Quality report generation
-│   ├── pipeline/            # End-to-end runner
-│   ├── api/                 # FastAPI server
-│   └── cli/                 # Typer CLI (dt command)
-└── tests/
-```
+*Note: LinkedIn profile scraping is stubbed out to respect LinkedIn's Terms of Service. The adapter validates the URL and stores it as a confirmed link without attempting unauthorized scraping.*

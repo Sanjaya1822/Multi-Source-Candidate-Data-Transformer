@@ -1,0 +1,45 @@
+Priya Ramesh
+priya.ramesh@gmail.com
++91-8765432109
+Chennai, Tamil Nadu, India
+LinkedIn: https://www.linkedin.com/in/priyaramesh
+GitHub: https://github.com/priyaramesh
+
+Career Objective
+A motivated fresher seeking opportunities in software development to apply strong programming skills and contribute to impactful projects.
+
+Education
+
+Rathinam Technical Campus
+B.Tech Information Technology
+2020-2024
+CGPA: 8.2/10
+
+Skills
+Python, Java, C, HTML, CSS, JavaScript, MySQL, MongoDB, Git, REST APIs, Machine Learning, Data Structures, Problem Solving
+
+Internship Experience
+
+Software Development Intern
+Zoho Corporation, Chennai
+June 2023 – August 2023
+Worked on building internal tools using Python and Django framework. Optimized database queries and wrote unit tests.
+
+Web Development Intern
+TCS iON Digital Learning Hub
+January 2024 – March 2024
+Developed responsive web applications using HTML, CSS, JavaScript and React. Integrated RESTful APIs.
+
+Projects
+
+Smart Attendance System using Face Recognition
+Technologies: Python, OpenCV, dlib, SQLite
+Automated attendance marking using facial recognition achieving 95% accuracy.
+
+E-Commerce Website
+Technologies: HTML, CSS, JavaScript, Node.js, MongoDB
+Built a full-stack e-commerce application with payment gateway integration.
+
+Certifications
+Python for Everybody – Coursera (2022)
+AWS Cloud Practitioner Essentials (2023)

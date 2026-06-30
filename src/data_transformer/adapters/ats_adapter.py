@@ -115,10 +115,20 @@ class ATSAdapter(SourceAdapter):
                 "emails": emails,
                 "phones": phones,
                 "location": location_raw,
+                "headline": data.get("headline", ""),
                 "links": links,
                 "skills": skills,
                 "experience": experience,
                 "education": education,
+            },
+            extraction_stats={
+                "format": "ats_json",
+                "positions_found": len(experience),
+                "education_found": len(education),
+                "skills_found": len(skills),
+                "emails_found": len(emails),
+                "phones_found": len(phones),
+                "fields_extracted": sum(1 for v in [full_name, emails, phones, location_raw, skills] if v),
             },
         )
 
