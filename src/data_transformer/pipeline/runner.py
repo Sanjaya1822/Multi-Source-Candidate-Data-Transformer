@@ -424,6 +424,15 @@ class PipelineRunner:
 
                 # Collect extraction_stats and stub notes from each record
                 for rec in records:
+                    if not rec.fields.get("full_name"):
+                        from pathlib import Path
+                        import re
+                        fname = Path(source.path).stem
+                        # Remove common words like resume, cv, notes
+                        clean_name = re.sub(r'(?i)(resume|cv|notes|profile|data)', '', fname).replace('_', ' ').replace('-', ' ').strip()
+                        if clean_name:
+                            rec.fields["full_name"] = clean_name
+                            
                     if rec.extraction_stats:
                         sr.extraction_stats.update(rec.extraction_stats)
                         stub_note = rec.extraction_stats.get("stub_note")

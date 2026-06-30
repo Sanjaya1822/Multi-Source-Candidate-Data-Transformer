@@ -55,10 +55,10 @@ def compute_identity_score(record_a: RawRecord, record_b: RawRecord) -> float:
     
     loc_score = 0.0
     if loc_a and loc_b and isinstance(loc_a, dict) and isinstance(loc_b, dict):
-        city_a = loc_a.get("city", "").lower()
-        city_b = loc_b.get("city", "").lower()
-        country_a = loc_a.get("country", "").lower()
-        country_b = loc_b.get("country", "").lower()
+        city_a = (loc_a.get("city") or "").lower()
+        city_b = (loc_b.get("city") or "").lower()
+        country_a = (loc_a.get("country") or "").lower()
+        country_b = (loc_b.get("country") or "").lower()
         
         if city_a and city_b and city_a == city_b:
             loc_score = 15.0

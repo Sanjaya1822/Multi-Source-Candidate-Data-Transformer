@@ -31,10 +31,13 @@ class Projector:
         canonical_fields.update({"projects", "certifications"}) # From _extras
         
         if self.fields:
+            import re
             for f in self.fields:
-                fname = f.get("from", f.get("path", "")).split(".")[0] if isinstance(f, dict) else f
-                if fname and fname not in canonical_fields and not fname.startswith("provenance") and not fname.startswith("candidate_id") and not fname.startswith("overall_confidence"):
-                    raise ProjectorError(f"ConfigError: field '{fname}' requested in projection does not exist in canonical schema.")
+                fname = f.get("from", f.get("path", "")) if isinstance(f, dict) else f
+                if fname:
+                    root_name = re.findall(r'[^.\[\]]+', fname)[0]
+                    if root_name not in canonical_fields and not root_name.startswith("provenance") and not root_name.startswith("candidate_id") and not root_name.startswith("overall_confidence"):
+                        raise ProjectorError(f"ConfigError: field '{fname}' requested in projection does not exist in canonical schema.")
                     
         self.renames = {}
         target_paths = set()
@@ -157,39 +160,74 @@ class Projector:
             return []
         return None
 
+    def _resolve_json_path(self, obj: Any, path: str) -> Any:
+        import re
+        parts = re.findall(r'[^.\[\]]+', path)
+        current = obj
+        for part in parts:
+            if current is None:
+                return None
+            if part.isdigit():
+                idx = int(part)
+                if isinstance(current, list) and idx < len(current):
+                    current = current[idx]
+                else:
+                    return None
+            elif isinstance(current, dict):
+                current = current.get(part)
+            elif hasattr(current, "model_dump"):
+                dump = current.model_dump(exclude_unset=True)
+                # Ensure we handle FieldValue/FieldProvenance properly
+                if "value" in dump and part not in dump:
+                    if hasattr(current, "value") and current.value is not None:
+                        val = current.value
+                        if hasattr(val, "model_dump"):
+                            dump = val.model_dump(exclude_unset=True)
+                        elif isinstance(val, dict):
+                            dump = val
+                        else:
+                            dump = {"value": val}
+                current = dump.get(part)
+            elif hasattr(current, part):
+                current = getattr(current, part)
+            else:
+                return None
+        return current
+
     def project(self, candidate: CandidateRecord) -> Dict[str, Any]:
         """Convert a CandidateRecord to the dynamic configuration shape."""
         out: Dict[str, Any] = {
             "candidate_id": candidate.candidate_id,
         }
 
-        # Determine which fields to include
+        # First construct the base dict of all supported top-level fields
+        base_dict = {}
+        for field in ["full_name", "headline", "years_experience", "emails", "phones", "location", "links", "skills", "experience", "education", "projects", "certifications"]:
+            val = self._get_raw_value(candidate, field)
+            if val is not None:
+                base_dict[field] = val
+        
         target_fields = []
         if self.fields:
             for f in self.fields:
                 if isinstance(f, dict):
-                    target_fields.append(f.get("from", f.get("path")))
+                    target_fields.append((f.get("from", f.get("path")), f.get("path")))
                 else:
-                    target_fields.append(f)
+                    target_fields.append((f, f))
         else:
-            target_fields = [
-                "full_name", "emails", "phones", "location", "links", 
-                "headline", "years_experience", "skills", "experience", "education"
-            ]
+            target_fields = [(f, f) for f in base_dict.keys()]
 
-        for field in target_fields:
-            if not field or field.startswith("candidate_id") or field.startswith("provenance") or field.startswith("overall_confidence"):
+        for from_path, to_path in target_fields:
+            if not from_path or from_path.startswith("candidate_id") or from_path.startswith("provenance") or from_path.startswith("overall_confidence"):
                 continue
                 
-            # Basic path resolution for 'from'
-            base_field = field.split(".")[0]
+            raw_val = self._resolve_json_path(base_dict, from_path)
+            out_key = self.renames.get(from_path, to_path)
             
-            raw_val = self._get_raw_value(candidate, base_field)
-            out_key = self.renames.get(base_field, base_field)
-            
-            if raw_val is None or (isinstance(raw_val, (list, dict, str)) and not raw_val):
+            # If on_missing is "omit", we omit if it is None or strictly empty collections
+            if raw_val is None or (isinstance(raw_val, (list, dict, str)) and len(raw_val) == 0):
                 if self.on_missing == "error":
-                    raise ProjectorError(f"Missing required field: {base_field}")
+                    raise ProjectorError(f"Missing required field: {from_path}")
                 elif self.on_missing == "null":
                     out[out_key] = None
                 # if "omit", do nothing
@@ -204,7 +242,6 @@ class Projector:
             if prov:
                 out["provenance"] = prov
 
-        # Validate that the final output doesn't drop the entire profile
         valid_keys = [k for k in out.keys() if k != "candidate_id" and out[k] is not None and out[k] != []]
         if not valid_keys:
              raise ProjectorError("Generated profile is completely empty")

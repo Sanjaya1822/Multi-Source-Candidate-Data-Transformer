@@ -1,42 +1,5 @@
-Varsha S
-varsharaja04.s@gmail.com . 9344873369
-Dindigul,TamilNadu,India.
-PROFESSIONAL SUMMARY
-Interested in software development with a focus on Java, backend development, database
-management, and basic web design. Responsible and passionate problem-solving with a strong
-interest in learning new technologies. Looking to apply skills in real projects and internships.
-PROFILE https://www.linkedin.com/in/varsha-s-1bab77351
-EDUCATION
-B.Tech Information Technology
-Rathinam Technical Campus ,Coimbatore
-CGPA:8.64
-Achyuta Public School - Dindigul , Tamil Nadu
-Grade:12th
-Percentage:76.4%
-Pannai Public School - Dindigul,Tamil Nadu
-Grade:10th
-Percentage :85.2%
-INTERNSHIP
-InterPe AUG - SEP 2025
-Worked on front-end web development,creating small interactive web pages and mini
-applications using HTML,CSS,JavaScript
-KaaShiv InfoTech NOV 2024
-Explored the basics of Web designing
-TECHNICAL SKILLS
-Programming Languages - Python , Java , C , HTML , CSS , JavaScript
-Database Management - SQL , MYSQL , PostgreSQL.
-CERTIFICATION
-Java fundamentals
-HTML and CSS
-JavaScript
-Database Management System
-Cloud Computing
-User Interface Design
-LANGUAGES
-English Tamil
-AREA OF INTEREST
-Web development, both frontend and backend development
-Database managing
-SOFT SKILLS
-Ability to learn new technologies quickly.
-Logical reasoning on technical issues and adapting to new tools and software.
+
+John Doe
+Location: San Francisco, CA
+Email: john@example.com
+Phone: 555-1234

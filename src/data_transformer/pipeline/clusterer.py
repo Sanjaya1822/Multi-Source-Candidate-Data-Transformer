@@ -121,9 +121,8 @@ class CandidateClusterer:
                     current_c.records.extend(other_c.records)
                     merged_in_pass3.add(other_c.cluster_id)
                 elif score >= self.manual_review_threshold:
+                    # Auto-merge lower scores as requested by the user, skipping the manual review block.
                     current_c.records.extend(other_c.records)
-                    current_c.requires_review = True
-                    current_c.review_reason += f"Fuzzy score {score:.1f}%"
                     merged_in_pass3.add(other_c.cluster_id)
                     
             final_clusters.append(current_c)

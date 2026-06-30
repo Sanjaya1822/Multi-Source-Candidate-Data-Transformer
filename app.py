@@ -95,7 +95,6 @@ st.markdown("""
 st.markdown("""
 <div class="header-container">
     <div class="header-title">DataTransformer Batch Processing</div>
-    <div style="color: #795548; font-weight: 500;">Enterprise Scale (up to 1000 files)</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -120,70 +119,128 @@ def get_runner():
     schema = yaml.safe_load((Path("config") / "output_schema.yaml").read_text())
     return PipelineRunner(config, schema)
 
-if st.session_state.pipeline_phase == "upload":
-    st.sidebar.markdown("### Output Configuration")
-    
-    selected_fields = st.sidebar.multiselect(
-        "Select Fields", 
-        options=["full_name", "emails", "phones", "location", "links", "headline", "years_experience", "skills", "experience", "education", "projects", "certifications"], 
-        default=["full_name", "emails", "phones", "location", "skills", "experience"]
-    )
-    
-    st.session_state.projection_config = {
-        "fields": selected_fields,
-        "include_confidence": True,
-        "include_provenance": True,
-        "on_missing": "null"
-    }
-    
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        st.markdown('<div class="saas-card"><div class="card-title">Structured Sources</div>', unsafe_allow_html=True)
-        structured_files = st.file_uploader("Upload ATS JSON or CSV", accept_multiple_files=True, type=["json", "csv"])
-        st.markdown('</div>', unsafe_allow_html=True)
-    with col2:
-        st.markdown('<div class="saas-card"><div class="card-title">Unstructured Sources</div>', unsafe_allow_html=True)
-        unstructured_files = st.file_uploader("Upload Resumes or Notes", accept_multiple_files=True, type=["pdf", "docx", "doc", "txt"])
-        st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="header-container"><h1>Candidate Data Transformer</h1></div>', unsafe_allow_html=True)
 
-    if st.button("Run Batch Pipeline"):
-        all_files = (structured_files or []) + (unstructured_files or [])
-        if not all_files:
-            st.error("Please provide at least one valid source.")
-        else:
-            sources = []
-            temp_dir = tempfile.mkdtemp()
-            for f in all_files:
-                path = os.path.join(temp_dir, f.name)
-                with open(path, "wb") as out:
-                    out.write(f.getvalue())
-                sources.append(Source(type=detect_source_type(f.name), path=path))
+if st.session_state.pipeline_phase == "upload":
+    col_left, col_right = st.columns([1, 2], gap="large")
+    
+    with col_left:
+        st.subheader("Pipeline Settings")
+        
+        # Output Schema Config
+        st.markdown("**Output Fields**")
+        all_fields = [
+            "candidate_id", "full_name", "emails", "emails[0].value", 
+            "phones", "phones[0].value", "location", "location.city", 
+            "location.country", "links", "skills", "experience", 
+            "education", "projects", "certifications", "headline", "years_experience"
+        ]
+        default_selections = ["candidate_id", "full_name", "emails", "phones", "skills", "experience"]
+        selected_fields = st.multiselect("Select fields to extract:", all_fields, default=default_selections)
+        
+        st.markdown("**Field Configuration (Rename & Normalize)**")
+        schema_fields = []
+        normalizations = {}
+        for f in selected_fields:
+            with st.expander(f"Configure: {f}"):
+                default_path = f.replace(".value", "").replace("[0]", "")
+                path = st.text_input("Rename to (path):", value=default_path, key=f"path_{f}")
                 
-            progress_bar = st.progress(0, text="Initializing Batch Pipeline...")
-            
-            def update_progress(stage, current, total):
-                if total > 0:
-                    pct = min(100, int((current / total) * 100))
-                    progress_bar.progress(pct, text=f"{stage}: {current} / {total}")
-            
-            runner = get_runner()
-            # Phase 1: Extraction & Clustering
-            clusters, source_results, norm_log, run_id, start_time = runner.run_phase_1(sources, on_progress=update_progress)
-            
-            # Phase 2: Merging & Projection
-            # For batch processing, we force manual review clusters to auto-merge or separate. We'll auto-merge here to prevent blocking 1000 files.
-            for c in clusters:
-                c.requires_review = False
+                norm_opts = ["None", "E164", "canonical"]
+                norm = st.selectbox("Normalization:", norm_opts, key=f"norm_{f}")
                 
-            result = runner.run_phase_2(
-                clusters=clusters,
-                source_results=source_results,
-                normalization_log=norm_log,
-                run_id=run_id,
-                start_time=start_time,
-                projection_config=st.session_state.projection_config,
-                on_progress=update_progress
-            )
+                field_def = {"path": path, "from": f}
+                schema_fields.append(field_def)
+                if norm != "None":
+                    normalizations[path] = norm
+            
+        st.markdown("---")
+        col_c, col_p = st.columns(2)
+        with col_c:
+            inc_conf = st.toggle("Include Confidence", value=True)
+        with col_p:
+            inc_prov = st.toggle("Include Provenance", value=False)
+            
+        on_missing = st.selectbox("On Missing Policy", ["omit", "null", "error"])
+        
+        # Hardcoded default for pipeline Phase 1 since UI is removed
+        pipeline_config = {
+            "deduplication": {"threshold": 0.85},
+            "conflict_resolution": {"strategy": "highest_confidence"}
+        }
+        
+        output_schema = {
+            "fields": schema_fields,
+            "include_confidence": inc_conf,
+            "include_provenance": inc_prov,
+            "on_missing": on_missing,
+            "normalizations": normalizations
+        }
+        
+        with st.expander("View Generated JSON Configs"):
+            config_json_str = st.text_area("Configuration JSON", value=json.dumps(pipeline_config, indent=4), height=150)
+            schema_json_str = st.text_area("Output Schema JSON", value=json.dumps(output_schema, indent=4), height=250)
+            
+
+
+        
+    with col_right:
+        col_up1, col_up2 = st.columns(2)
+        with col_up1:
+            st.subheader("Structured Sources")
+            structured_files = st.file_uploader("Upload ATS JSON or CSV", accept_multiple_files=True, type=["json", "csv"])
+    
+        with col_up2:
+            st.subheader("Unstructured Sources")
+            unstructured_files = st.file_uploader("Upload Resumes or Notes", accept_multiple_files=True, type=["pdf", "docx", "doc", "txt"])
+    
+
+        if st.button("Run Batch Pipeline"):
+            all_files = (structured_files or []) + (unstructured_files or [])
+            if not all_files:
+                st.error("Please provide at least one valid source.")
+            else:
+                try:
+                    pipeline_config = json.loads(config_json_str)
+                    output_schema = json.loads(schema_json_str)
+                except Exception as e:
+                    st.error(f"Invalid JSON configuration: {e}")
+                    st.stop()
+                    
+                sources = []
+                temp_dir = tempfile.mkdtemp()
+                for f in all_files:
+                    path = os.path.join(temp_dir, f.name)
+                    with open(path, "wb") as out:
+                        out.write(f.getvalue())
+                    sources.append(Source(type=detect_source_type(f.name), path=path))
+                    
+                progress_bar = st.progress(0, text="Initializing Batch Pipeline...")
+                
+                def update_progress(stage, current, total):
+                    if total > 0:
+                        pct = min(100, int((current / total) * 100))
+                        progress_bar.progress(pct, text=f"{stage}: {current} / {total}")
+                
+                # Instantiate runner directly with the provided JSON configs
+                runner = PipelineRunner(pipeline_config, output_schema)
+                
+                # Phase 1: Extraction & Clustering
+                clusters, source_results, norm_log, run_id, start_time = runner.run_phase_1(sources, on_progress=update_progress)
+                
+                # Phase 2: Merging & Projection
+                for c in clusters:
+                    c.requires_review = False
+                    
+                result = runner.run_phase_2(
+                    clusters=clusters,
+                    source_results=source_results,
+                    normalization_log=norm_log,
+                    run_id=run_id,
+                    start_time=start_time,
+                    projection_config=output_schema,
+                    on_progress=update_progress
+                )
             
             progress_bar.empty()
             st.session_state.final_result = result
@@ -208,7 +265,7 @@ elif st.session_state.pipeline_phase == "results":
     col3.metric("Duplicates Merged", summary.get("duplicates_merged", 0))
     col4.metric("Failed Files", summary.get("failed_files", 0))
     
-    st.markdown('<div class="saas-card"><div class="card-title">Export Options</div>', unsafe_allow_html=True)
+    st.subheader("Export Options")
     
     combined_json = {
         "summary": summary,
@@ -245,10 +302,10 @@ elif st.session_state.pipeline_phase == "results":
             file_name="batch_candidates_archive.zip",
             mime="application/zip"
         )
-    st.markdown('</div>', unsafe_allow_html=True)
     
-    st.markdown('<div class="saas-card"><div class="card-title">Generated Candidates</div>', unsafe_allow_html=True)
+    st.subheader("Generated Candidates")
     for p in res.profiles:
-        with st.expander(f"{p.get('full_name', 'Unknown Candidate')} - {p.get('candidate_id', '')}"):
+        name = p.get('full_name') or p.get('candidate_name') or 'Unknown Candidate'
+        with st.expander(f"{name} - {p.get('candidate_id', '')}"):
             st.json(p)
     st.markdown('</div>', unsafe_allow_html=True)
